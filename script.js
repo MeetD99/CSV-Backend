@@ -10,7 +10,6 @@ app.use(express.json())
 let values = {
     "22K": "70000",
     "18K": "60000",
-    "BuyBack": "65000",
     "Date": ""
 }
 
