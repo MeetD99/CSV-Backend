@@ -9,7 +9,7 @@ const port = 3000
 app.use(cors())
 app.use(express.json())
 
-const dataFilePath = './rates.json'
+const dataFilePath = 'rates.json'
 
 const readData = () => {
     try{
