@@ -6,7 +6,10 @@ import fs, { read, write } from 'fs'
 const app = express()
 const port = 3000
 
-app.use(cors())
+app.use(cors({
+    origin: 'https://choksishamaljivallabhji.netlify.app', // Replace with your Netlify app URL
+    methods: ['GET', 'POST']
+}))
 app.use(express.json())
 
 const dataFilePath = 'rates.json'
