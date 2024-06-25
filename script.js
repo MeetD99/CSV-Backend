@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import fs, { read, write } from 'fs'
-
+import initializeDatabase from './database.js'
 
 const app = express()
 const port = 3000
@@ -12,39 +12,62 @@ app.use(cors({
 }))
 app.use(express.json())
 
-const dataFilePath = 'rates.json'
+let db;
 
-const readData = () => {
-    try{
-        const rawData = fs.readFileSync(dataFilePath);
-        return JSON.parse(rawData);
-    } catch (error){
-        console.error('Error Reading the file:', error);
-        return {};
-    }
-};
+// const dataFilePath = 'rates.json'
 
-const writeData = (data) =>{
-    try {
-        fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.error("Error writing to file!", error);
-    }
-}
+// const readData = () => {
+//     try{
+//         const rawData = fs.readFileSync(dataFilePath);
+//         return JSON.parse(rawData);
+//     } catch (error){
+//         console.error('Error Reading the file:', error);
+//         return {};
+//     }
+// };
 
-app.get('/', (req, res) => {
-    const data = readData();
-    res.json(data);
-})
+// const writeData = (data) =>{
+//     try {
+//         fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+//     } catch (error) {
+//         console.error("Error writing to file!", error);
+//     }
+// }
 
-app.post('/update', (req, res) => {
-    const { key, value } = req.body;
-    const data = readData();
-    data[key] = value;
-    writeData(data);
-    res.json({message: 'Data Updated successfully!'});
-})
+// app.get('/', (req, res) => {
+//     const data = readData();
+//     res.json(data);
+// })
 
-app.listen(port, () => {
-    console.log("Server Running successfully!");
-})
+// app.post('/update', (req, res) => {
+//     const { key, value } = req.body;
+//     const data = readData();
+//     data[key] = value;
+//     writeData(data);
+//     res.json({message: 'Data Updated successfully!'});
+// })
+
+initializeDatabase().then(database => {
+    db = database;
+  
+    // Endpoint to get prices and date
+    app.get('/', async (req, res) => {
+      const prices = await db.all('SELECT key, value FROM prices');
+      const data = prices.reduce((acc, row) => {
+        acc[row.key] = row.value;
+        return acc;
+      }, {});
+      res.json(data);
+    });
+  
+    // Endpoint to update prices and date
+    app.post('/update', async (req, res) => {
+      const { key, value } = req.body;
+      await db.run('INSERT OR REPLACE INTO prices (key, value) VALUES (?, ?)', [key, value]);
+      res.json({ message: 'Data updated successfully' });
+    });
+
+    app.listen(port, () => {
+        console.log("Server Running successfully!");
+    });
+});
