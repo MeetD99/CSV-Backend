@@ -16,16 +16,16 @@ const readData = () => {
         const rawData = fs.readFileSync(dataFilePath);
         return JSON.parse(rawData);
     } catch (error){
-        console.error('Error Reading the file');
+        console.error('Error Reading the file:', error);
         return {};
     }
 };
 
-const writeData = () =>{
+const writeData = (data) =>{
     try {
         fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
     } catch (error) {
-        console.error("Error writing to file!");
+        console.error("Error writing to file!", error);
     }
 }
 
